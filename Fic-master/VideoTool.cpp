@@ -5,6 +5,13 @@
 #include "opencv2/highgui/highgui.hpp"
 //#include <opencv2\cv.h>
 #include "opencv2/opencv.hpp"
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include<arpa/inet.h>
+#include <unistd.h>
+
 
 using namespace std;
 using namespace cv;
@@ -175,10 +182,53 @@ void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed) {
 		else putText(cameraFeed, "TOO MUCH NOISE! ADJUST FILTER", Point(0, 50), 1, 2, Scalar(0, 0, 255), 2);
 	}
 }
+
+void func(char a[],int clientSocket)
+{
+	
+	for(int i=0; i<strlen(a);i++)
+		if(a[i]=='f' || a[i]=='b' || a[i]=='r' || a[i]=='l')
+		{	char afis[15]="";
+			sprintf(afis,"%c",a[i]);
+			send(clientSocket, afis, 13, 0);
+			usleep(1000000);
+		}
+}
 int main(int argc, char* argv[])
 {
+int clientSocket;
+  char buffer[1024];
+  struct sockaddr_in serverAddr;
+  socklen_t addr_size;
 
-	//some boolean variables for different functionality within this
+  /*---- Create the socket. The three arguments are: ----*/
+  /* 1) Internet domain 2) Stream socket 3) Default protocol (TCP in this case) */
+  clientSocket = socket(PF_INET, SOCK_STREAM, 0);
+  
+  /*---- Configure settings of the server address struct ----*/
+  /* Address family = Internet */
+  serverAddr.sin_family = AF_INET;
+  /* Set port number, using htons function to use proper byte order */
+  serverAddr.sin_port = htons(20232);
+  /* Set IP address to localhost */
+  serverAddr.sin_addr.s_addr = inet_addr("193.226.12.217");
+  /* Set all bits of the padding field to 0 */
+  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
+
+  /*---- Connect the socket to the server using the address struct ----*/
+  addr_size = sizeof serverAddr;
+  connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+
+
+  /*---- Print the received message ----*/
+  
+  scanf("%s",buffer);
+  func(buffer,clientSocket);
+char a[2]="s";
+  send(clientSocket,a , 13, 0);  
+
+  return 0;
+/*	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
 	bool useMorphOps = true;
@@ -254,6 +304,6 @@ int main(int argc, char* argv[])
 		waitKey(30);
 	}
 
-	return 0;
+	return 0;*/
 }
 
