@@ -23,6 +23,12 @@ int S_MIN = 0;
 int S_MAX = 256;
 int V_MIN = 0;
 int V_MAX = 256;
+int H_MIN1 = 162;
+int H_MAX1= 256;
+int S_MIN1 = 0;
+int S_MAX1 = 256;
+int V_MIN1 = 0;
+int V_MAX1 = 256;
 //default capture width and height
 const int FRAME_WIDTH = 640;
 const int FRAME_HEIGHT = 480;
@@ -222,13 +228,9 @@ int clientSocket;
 
   /*---- Print the received message ----*/
   
-  scanf("%s",buffer);
-  func(buffer,clientSocket);
-char a[2]="s";
-  send(clientSocket,a , 13, 0);  
+  
 
-  return 0;
-/*	//some boolean variables for different functionality within this
+	//some boolean variables for different functionality within this
 	//program
 	bool trackObjects = true;
 	bool useMorphOps = true;
@@ -240,8 +242,10 @@ char a[2]="s";
 	Mat HSV;
 	//matrix storage for binary threshold image
 	Mat threshold;
+	Mat threshold2;
 	//x and y values for the location of the object
 	int x = 0, y = 0;
+	int x1 = 0, y1 = 0;
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
@@ -280,20 +284,33 @@ char a[2]="s";
 			trackFilteredObject(x, y, threshold, cameraFeed);
 		
 
-   	inRange(HSV, Scalar(27, 23, V_MIN), Scalar(31, S_MAX, V_MAX), threshold);
+   	inRange(HSV, Scalar(H_MIN1, S_MIN1, V_MIN1), Scalar(H_MAX1, S_MAX1, V_MAX1), threshold2);
 		//perform morphological operations on thresholded image to eliminate noise
 		//and emphasize the filtered object(s)
    
    //cod duplicat 
 		if (useMorphOps)
-			morphOps(threshold);
+			morphOps(threshold2);
 		//pass in thresholded frame to our object tracking function
 		//this function will return the x and y coordinates of the
 		//filtered object
 		if (trackObjects)
-			trackFilteredObject(x, y, threshold, cameraFeed);
+			trackFilteredObject(x1, y1, threshold2, cameraFeed);
     //end cod duplicat
-
+		if(x>x1)
+			  send(clientSocket,"f" , 13, 0);  
+		if(x==x1)
+			send(clientSocket,"s" , 13, 0); 
+		if(x1>x)
+			send(clientSocket,"b" , 13, 0);
+		if(y1>y)
+			send(clientSocket,"r" , 13, 0);
+		if(y1==y)
+			send(clientSocket,"s" , 13, 0);
+		if(y>x1)
+			send(clientSocket,"l" , 13, 0);
+		if(x == 0 || y == 0)
+			send(clientSocket,"s" , 13, 0);
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
@@ -304,6 +321,6 @@ char a[2]="s";
 		waitKey(30);
 	}
 
-	return 0;*/
+	return 0;
 }
 
